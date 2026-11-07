@@ -1,5 +1,5 @@
 /**
- * Interface untuk karakter yang dapat mengambil posisi bertahan.
+ * Interface untuk petarung yang bisa bertahan.
  */
 public interface Bertahan {
     void bertahan();

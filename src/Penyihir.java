@@ -1,14 +1,16 @@
 /**
- * Subclass: Penyihir (damage sihir tinggi, HP rendah).
+ * Subclass: Penyihir (sihir kuat, bisa memulihkan diri). Mengimplementasikan dua interface.
  */
-public class Penyihir extends Karakter implements PemakaiSkill {
+// [Konsep 10] implements dua interface
+public class Penyihir extends Petarung implements Penyerang, Penyembuh {
 
-    private static final int BIAYA_SKILL = 15;
+    private static final int BIAYA_SERANGAN = 12;
+    private static final int BIAYA_PULIH = 10;
 
     private int kekuatanSihir;
 
     public Penyihir(String nama) {
-        super(nama, 80, 60, 8, 3);
+        super(nama, 95, 40, 10, 3);
         this.kekuatanSihir = 12;
     }
 
@@ -17,35 +19,38 @@ public class Penyihir extends Karakter implements PemakaiSkill {
         this.kekuatanSihir = kekuatanSihir;
     }
 
-    // [Konsep 8] if/else membaca & mengubah state (MP)
+    // [Konsep 8] if/else membaca & mengubah state (HP, energi)
     @Override
-    public void serang(Karakter target) {
-        if (getMp() >= BIAYA_SKILL) {
-            gunakanSkill(target);
+    public void beraksi(Petarung lawan) {
+        if (isHpKritis() && getEnergi() >= BIAYA_PULIH) {
+            pulihkanDiri();
+        } else if (getEnergi() >= BIAYA_SERANGAN) {
+            seranganKhusus(lawan);
         } else {
-            int damage = hitungDamage(2, target);
-            System.out.println(getNama() + " memukul dengan tongkat ke " + target.getNama()
-                    + " dan memulihkan 8 MP.");
-            target.terimaDamage(damage);
-            setMp(getMp() + 8);
+            System.out.println(getNama() + " memukul dengan tongkat dan memulihkan 8 energi.");
+            lawan.terimaDamage(hitungDamage(2, lawan));
+            setEnergi(getEnergi() + 8);
         }
     }
 
     @Override
-    public void gunakanSkill(Karakter target) {
-        if (getMp() >= BIAYA_SKILL) {
-            setMp(getMp() - BIAYA_SKILL);
-            int damage = hitungDamage(kekuatanSihir * 3, target);
-            System.out.println(getNama() + " merapal " + getNamaSkill() + " ke " + target.getNama() + "!");
-            target.terimaDamage(damage);
-        } else {
-            System.out.println(getNama() + " kekurangan MP untuk " + getNamaSkill() + "!");
-        }
+    public void seranganKhusus(Petarung lawan) {
+        setEnergi(getEnergi() - BIAYA_SERANGAN);
+        System.out.println(getNama() + " merapal " + getNamaSerangan() + "!");
+        lawan.terimaDamage(hitungDamage(kekuatanSihir * 2, lawan));
     }
 
     @Override
-    public String getNamaSkill() {
+    public String getNamaSerangan() {
         return "Bola Api";
+    }
+
+    @Override
+    public void pulihkanDiri() {
+        setEnergi(getEnergi() - BIAYA_PULIH);
+        int jumlah = kekuatanSihir * 3;
+        setHp(getHp() + jumlah);
+        System.out.println(getNama() + " memulihkan diri +" + jumlah + " HP (HP " + getHp() + "/" + getMaxHp() + ")");
     }
 
     @Override
